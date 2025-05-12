@@ -25,25 +25,27 @@ class PredictionPipeline:
 
     
     def get_model_from_gcloud(self) -> str:
-        """
-        Method Name :   get_model_from_gcloud
-        Description :   This method to get best model from google cloud storage
-        Output      :   best_model_path
-        """
+ 
         logging.info("Entered the get_model_from_gcloud method of PredictionPipeline class")
         try:
-            # Loading the best model from s3 bucket
             os.makedirs(self.model_path, exist_ok=True)
-            self.gcloud.sync_folder_from_gcloud(self.bucket_name, self.model_name, self.model_path)
             best_model_path = os.path.join(self.model_path, self.model_name)
+
+        # Check if model already exists locally
+            if os.path.exists(best_model_path):
+                logging.info(f"Model already exists at {best_model_path}, skipping download.")
+            else:
+            # Sync from Google Cloud if not present
+                self.gcloud.sync_folder_from_gcloud(self.bucket_name, self.model_name, self.model_path)
+                logging.info(f"Downloaded model from GCloud to {best_model_path}")
+
             logging.info("Exited the get_model_from_gcloud method of PredictionPipeline class")
             return best_model_path
 
         except Exception as e:
             raise CustomException(e, sys) from e
-        
 
-    
+
     def predict(self,best_model_path,text):
         """load image, returns cuda tensor"""
         logging.info("Running the predict function")
