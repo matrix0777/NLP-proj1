@@ -10,3 +10,13 @@ python3 template.py
 ```bash
 python3.8 -m venv NLP-proj1
 ```
+```bash
+source NLP-proj1/bin/activate
+
+```
+
+# Add logger and Execption
+
+
+
+
