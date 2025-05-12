@@ -17,13 +17,5 @@ source NLP-proj1/bin/activate
 
 # Add logger and Execption
 
-# Project Workflow 
-
--constants
--config-entity
--artifact-entity
--components
--pipelines
--app.py
 
 
