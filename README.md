@@ -27,3 +27,6 @@ source NLP-proj1/bin/activate
 -app.py
 
 
+# Repeat the steps for all the pipelines
+
+# Then preapre pridiction pipeline
