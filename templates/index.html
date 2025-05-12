@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hate Speech Detection</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <h1 class="fade-in">🛡️ Hate Speech Detector</h1>
+            <form method="post" action="/predict" class="fade-in">
+                <textarea name="text" placeholder="Type something controversial... 🤖" required>{{ input_text }}</textarea>
+                <div class="btn-group">
+                    <button type="submit" class="btn predict">🔍 Predict</button>
+                    <a href="/train" class="btn train">⚙️ Train Model</a>
+                </div>
+            </form>
+            {% if result %}
+            <div class="result fade-in">
+                <strong>🧠 Result:</strong> {{ result }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
