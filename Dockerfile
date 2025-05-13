@@ -1,9 +1,9 @@
 FROM python:3.7-slim-buster
 
 RUN apt update -y && apt install awscli -y
-WORKDIR /app
+WORKDIR /web
 
-COPY . /app
+COPY . /web
 RUN pip install -r requirements.txt
 
-CMD ["python3", "app.py"]
+CMD ["python3", "web.py"]
