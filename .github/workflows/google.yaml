@@ -1,4 +1,4 @@
-name: CI/CD to Google Cloud
+name: Deploy to GCE VM
 
 on:
   push:
@@ -13,24 +13,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Google Cloud SDK
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up gcloud CLI
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
 
-    - name: Authorize Docker with GCP
-      run: gcloud auth configure-docker
-
-    - name: Build and push Docker image
+    - name: Copy code to VM
       run: |
-        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:$GITHUB_SHA .
-        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:$GITHUB_SHA
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
+        chmod 600 key.pem
+        scp -o StrictHostKeyChecking=no -i key.pem -r . ${{ secrets.GCE_USER }}@${{ secrets.GCE_INSTANCE_IP }}:/home/${{ secrets.GCE_USER }}/app
 
-    - name: Deploy to Cloud Run
+    - name: SSH into VM and run app
       run: |
-        gcloud run deploy my-app \
-          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:$GITHUB_SHA \
-          --region ${{ secrets.GCP_REGION }} \
-          --platform managed \
-          --allow-unauthenticated
+        ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.GCE_USER }}@${{ secrets.GCE_INSTANCE_IP }} << 'EOF'
+          cd ~/app
+          pip3 install -r requirements.txt || true
+          nohup python3 app.py > output.log 2>&1 &
+        EOF
