@@ -1,13 +1,11 @@
-name: NLP Project CI
+name: NLP Project CI/CD
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,12 +24,18 @@ jobs:
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
       - name: Run Python syntax check
-        run: |
-          python -m py_compile *.py
+        run: python -m py_compile *.py
 
-      
-
-      # Uncomment the following if you have test scripts
-      # - name: Run tests
-      #   run: |
-      #     pytest
+      - name: Deploy to GCP VM
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.GCP_VM_HOST }}
+          username: ${{ secrets.GCP_VM_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          script: |
+            cd NLP-proj1
+            git pull origin main
+            pip install -r requirements.txt
+            pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+            pkill -f web.py || true
+            nohup python3 web.py > log.txt 2>&1 &
