@@ -1,29 +1,36 @@
-google_cloud:
-  project_id: your-project-id
-  credentials_path: path/to/your/credentials.json
-  api_endpoint: language.googleapis.com
-  region: us-central1
+name: CI/CD to Google Cloud
 
-  natural_language_api:
-    enabled: true
-    features:
-      - sentiment_analysis
-      - entity_analysis
-      - syntax_analysis
+on:
+  push:
+    branches:
+      - main
 
-  automl_natural_language:
-    enabled: true
-    model_id: your-automl-model-id
-    location: us-central1
-    score_threshold: 0.5
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-  gcs:
-    enabled: true
-    bucket_name: your-gcs-bucket-name
-    dataset_path: datasets/
-    model_path: models/
-    output_path: output/
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-env:
-  GOOGLE_APPLICATION_CREDENTIALS: path/to/your/credentials.json
-  GOOGLE_CLOUD_PROJECT: your-project-id
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Authorize Docker with GCP
+      run: gcloud auth configure-docker
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:$GITHUB_SHA .
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:$GITHUB_SHA
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy my-app \
+          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:$GITHUB_SHA \
+          --region ${{ secrets.GCP_REGION }} \
+          --platform managed \
+          --allow-unauthenticated
