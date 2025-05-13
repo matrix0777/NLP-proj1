@@ -2,37 +2,36 @@ name: Deploy to GCE VM
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]  # or change to your branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-    - name: Set up gcloud CLI
-      uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: your-project-id
+          install_components: 'beta'
 
-    - name: Copy code to VM
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
-        chmod 600 key.pem
-        scp -o StrictHostKeyChecking=no -i key.pem -r . ${{ secrets.GCE_USER }}@${{ secrets.GCE_INSTANCE_IP }}:/home/${{ secrets.GCE_USER }}/app
-
-    - name: SSH into VM and run app
-      run: |
-        ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.GCE_USER }}@${{ secrets.GCE_INSTANCE_IP }} << 'EOF'
-          cd ~/app
-          pip3 install -r requirements.txt || true
-          nohup python3 app.py > output.log 2>&1 &
-        EOF
+      - name: SSH into GCE and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.GCE_INSTANCE_IP }}
+          username: ${{ secrets.GCE_USERNAME }}
+          key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
+          script: |
+            cd /path/to/your/app
+            git pull
+            # run your build/start scripts here, e.g.:
+            # pip install -r requirements.txt
+            # python app.py
