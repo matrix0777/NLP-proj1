@@ -2,7 +2,7 @@ name: Deploy to GCE VM
 
 on:
   push:
-    branches: [main]  # or change to your branch
+    branches: main 
 
 jobs:
   deploy:
