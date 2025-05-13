@@ -28,7 +28,7 @@ jobs:
         with:
           host: ${{ secrets.GCE_INSTANCE_IP }}
           username: ${{ secrets.GCE_USERNAME }}
-          key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /path/to/your/app
             git pull
