@@ -2,7 +2,8 @@ name: Deploy to GCE VM
 
 on:
   push:
-    branches: main 
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -20,7 +21,7 @@ jobs:
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: your-project-id 
+          project_id: your-project-id
           install_components: 'beta'
 
       - name: SSH into GCE and deploy
@@ -29,9 +30,8 @@ jobs:
           host: ${{ secrets.GCE_INSTANCE_IP }}
           username: ${{ secrets.GCE_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: | 
-            cd /path/to/your/app
+          script: |
+            cd /app
             git pull
-            # run your build/start scripts here, e.g.:
-            # pip install -r requirements.txt
-            # python app.py
+            python3 -m pip install --upgrade pip
+            pip3 install -r requirements.txt
