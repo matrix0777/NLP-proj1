@@ -1,34 +1,39 @@
-name: Python CI
+name: NLP Project CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'  # Adjust based on your project requirements
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-    - name: Lint with flake8
-      run: |
-        pip install flake8
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-    - name: Run basic script check
-      run: |
-        python app.py
+      - name: Run Python syntax check
+        run: |
+          python -m py_compile *.py
+
+      - name: Run main script (optional)
+        run: |
+          python main.py
+
+      # Uncomment the following if you have test scripts
+      # - name: Run tests
+      #   run: |
+      #     pytest
