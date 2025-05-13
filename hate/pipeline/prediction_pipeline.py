@@ -69,8 +69,8 @@ class PredictionPipeline:
                 print("hate and abusive")
                 return "hate and abusive"
             else:
-                print("no hate")
-                return "no hate"
+                print("Normal")
+                return "Normal"
         except Exception as e:
             raise CustomException(e, sys) from e
 
