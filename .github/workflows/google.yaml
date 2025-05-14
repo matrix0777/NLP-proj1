@@ -1,4 +1,4 @@
-name: NLP Project CI
+name: NLP Project CI/CD
 
 on:
   push:
@@ -29,9 +29,28 @@ jobs:
         run: |
           python -m py_compile *.py
 
-      
-
-      # Uncomment the following if you have test scripts
       # - name: Run tests
       #   run: |
       #     pytest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to GCP VM
+        run: |
+          ssh -i ~/.ssh/id_rsa USER@${{ secrets.GCP_VM_IP }} << 'EOF'
+            cd /path/to/project
+            git pull origin main
+            source venv/bin/activate
+            pip install -r requirements.txt
+            # Add any other deployment steps here
+          EOF
