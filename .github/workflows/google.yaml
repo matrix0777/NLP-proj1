@@ -38,11 +38,12 @@ jobs:
       - name: Create SSH directory
         run: mkdir -p ~/.ssh
 
-      - name: Add SSH key
+      - name: Set up SSH key
         run: |
-          echo "${{ secrets.GCP_VM_SSH_KEY }}" > ~/.ssh/id_rsa
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GCP_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts
+
 
       - name: Deploy to GCP VM
         run: |
